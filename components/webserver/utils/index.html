@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#5362FF">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="PWN">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%235362FF'/><text x='50' y='62' font-size='42' text-anchor='middle' fill='white' font-family='Arial' font-weight='900'>PWN</text></svg>">
+<title>ESP32 PWN — WiFi Tool PRO</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#070A14;--bg2:#0F1323;--card:#13182E;--card2:#1A2040;--br:#232A4D;--acc:#5362FF;--acc2:#00D9FF;--ok:#00E676;--warn:#FF3B30;--txt:#E8ECFF;--mut:#8B92B8;--r:16px}
+body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:var(--acc2);text-decoration:none}
+.bg{position:fixed;inset:0;z-index:-1;background:radial-gradient(800px 500px at 20% 0%,rgba(83,98,255,.18),transparent 70%),radial-gradient(700px 500px at 90% 30%,rgba(0,217,255,.12),transparent 60%),linear-gradient(180deg,var(--bg) 0%,#0A0F24 100%)}
+.hdr{position:sticky;top:0;z-index:10;backdrop-filter:blur(12px);background:rgba(7,10,20,.7);border-bottom:1px solid var(--br)}
+.hdrin{max-width:1100px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:grid;place-items:center;font-weight:900;letter-spacing:-.5px;box-shadow:0 8px 24px rgba(83,98,255,.35)}
+.brand h1{font-size:15px;font-weight:800;letter-spacing:-.3px}
+.brand p{font-size:11px;color:var(--mut);margin-top:1px}
+.badge{font-size:11px;padding:7px 12px;border-radius:999px;border:1px solid var(--br);background:rgba(255,255,255,.03);color:var(--mut);white-space:nowrap}
+.badge i{width:8px;height:8px;border-radius:50%;background:var(--ok);display:inline-block;margin-inline-end:6px;box-shadow:0 0 8px var(--ok);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.wrap{max-width:1100px;margin:0 auto;padding:22px 20px 40px;display:grid;grid-template-columns:1.15fr .85fr;gap:18px}
+@media(max-width:900px){.wrap{grid-template-columns:1fr}}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01));border:1px solid var(--br);border-radius:var(--r);overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.card-h{padding:16px 18px;border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.card-h h2{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);font-weight:700}
+.card-b{padding:16px 18px}
+.btn{appearance:none;border:0;cursor:pointer;font-weight:700;font-size:13px;padding:10px 16px;border-radius:12px;transition:.15s;display:inline-flex;align-items:center;gap:8px;justify-content:center}
+.btn-p{background:linear-gradient(135deg,var(--acc),#7B6CFF);color:#fff;box-shadow:0 8px 18px rgba(83,98,255,.35)}
+.btn-p:hover{transform:translateY(-1px);filter:brightness(1.05)}
+.btn-g{background:rgba(255,255,255,.06);color:var(--txt);border:1px solid var(--br)}
+.btn-g:hover{background:rgba(255,255,255,.09)}
+.btn:active{transform:translateY(0)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.inp, .sel{width:100%;background:#0D1126;border:1px solid var(--br);color:var(--txt);border-radius:12px;padding:10px 12px;font-size:13px;outline:0;transition:.15s}
+.inp:focus,.sel:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(83,98,255,.2)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.grid2{grid-template-columns:1fr}}
+.lab{font-size:11px;color:var(--mut);font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;display:block}
+.ap-toolbar{display:flex;gap:8px;margin-bottom:12px}
+.search{flex:1;position:relative}
+.search input{padding-inline-start:36px}
+.search svg{position:absolute;inset-inline-start:10px;top:50%;transform:translateY(-50%);opacity:.5}
+.aplist{max-height:380px;overflow:auto;border:1px solid var(--br);border-radius:12px;background:rgba(0,0,0,.18)}
+.aplist::-webkit-scrollbar{width:6px;height:6px}
+.aplist::-webkit-scrollbar-thumb{background:var(--br);border-radius:99px}
+.row{display:grid;grid-template-columns:1fr auto;gap:8px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.06);cursor:pointer;transition:.15s}
+.row:last-child{border:0}
+.row:hover{background:rgba(83,98,255,.08)}
+.row.sel{background:linear-gradient(90deg,rgba(83,98,255,.18),rgba(0,217,255,.08));border-inline-start:3px solid var(--acc)}
+.ssid{font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta{font-size:11px;color:var(--mut);font-family:ui-monospace,Menlo,monospace}
+.rssi{display:flex;align-items:center;gap:10px;justify-content:flex-end}
+.bars{display:flex;align-items:flex-end;gap:3px;height:16px}
+.bars i{width:3px;background:var(--mut);border-radius:99px;display:block}
+.bars.ok i{background:var(--ok)} .bars.mid i{background:#FFB020} .bars.low i{background:var(--warn)}
+.pill{font-size:11px;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--br)}
+.attack-types{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+@media(max-width:600px){.attack-types{grid-template-columns:1fr}}
+.at{border:1px solid var(--br);background:rgba(255,255,255,.03);border-radius:12px;padding:12px;cursor:pointer;transition:.15s}
+.at.active{border-color:var(--acc);background:linear-gradient(135deg,rgba(83,98,255,.16),rgba(0,217,255,.08));box-shadow:0 0 0 3px rgba(83,98,255,.15)}
+.at b{font-size:13px;display:block}
+.at span{font-size:11px;color:var(--mut)}
+.kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.k{background:rgba(255,255,255,.04);border:1px solid var(--br);border-radius:12px;padding:12px;text-align:center}
+.k b{font-size:18px;display:block}
+.k span{font-size:11px;color:var(--mut);letter-spacing:.06em;text-transform:uppercase}
+.progress{height:8px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin:12px 0}
+.bar{height:100%;width:0%;background:linear-gradient(90deg,var(--acc),var(--acc2));transition:width .3s;border-radius:99px}
+.toast{position:fixed;inset-inline:0;top:14px;display:grid;place-items:center;z-index:99;pointer-events:none}
+.toast div{pointer-events:auto;background:#1A1F3D;border:1px solid var(--br);color:var(--txt);padding:10px 14px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.4);font-size:13px;display:none;max-width:90vw}
+.code{font-family:ui-monospace,Menlo,monospace;background:#0A0E22;border:1px solid var(--br);border-radius:10px;padding:10px 12px;word-break:break-all;font-size:12px;overflow:auto}
+.hint{font-size:12px;color:var(--mut);background:rgba(255,176,32,.08);border:1px solid rgba(255,176,32,.2);padding:10px 12px;border-radius:12px}
+.skel{height:14px;background:linear-gradient(90deg,rgba(255,255,255,.06),rgba(255,255,255,.12),rgba(255,255,255,.06));background-size:200% 100%;animation:sh 1.2s infinite;border-radius:8px}
+@keyframes sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<header class="hdr">
+<div class="hdrin">
+<div class="brand">
+<div class="logo">PWN</div>
+<div><h1>ESP32 Wi-Fi Penetration Tool</h1><p>Management AP • 192.168.4.1 • سريع ومطور</p></div>
+</div>
+<div style="display:flex;gap:8px;align-items:center"><button id="installBtn" class="btn btn-g hide" style="padding:7px 12px;font-size:11px" onclick="doInstall()"> تثبيت التطبيق</button><label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--mut);cursor:pointer"><input type="checkbox" id="turbo" onchange="toggleTurbo()" style="accent-color:var(--acc)"> TURBO</label><div class="badge"><i></i><span id="conn">متصل — Ready</span></div></div>
+</div>
+</header>
+
+<div id="toast" class="toast"><div id="toastMsg"></div></div>
+
+<section id="loading" class="wrap" style="display:grid;place-items:center;min-height:40vh">
+<div class="card" style="width:min(520px,92vw);text-align:center;padding:28px">
+<div class="skel" style="height:18px;width:60%;margin:0 auto 14px"></div>
+<div class="skel" style="height:12px;width:80%;margin:0 auto 8px"></div>
+<div class="skel" style="height:12px;width:70%;margin:0 auto"></div>
+<p style="margin-top:14px;color:var(--mut);font-size:13px">جاري التحميل... يرجى الانتظار</p>
+</div>
+</section>
+
+<main id="ready" class="wrap hide">
+<div style="display:grid;gap:18px;align-content:start">
+<div class="card">
+<div class="card-h"><h2> اختيار الهدف — Scan</h2><button class="btn btn-g" onclick="refreshAps()" style="padding:8px 12px">↻ تحديث</button></div>
+<div class="card-b">
+<div class="ap-toolbar">
+<label class="search" style="flex:1"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20L16 16"/></svg><input id="apSearch" class="inp" placeholder="ابحث SSID / BSSID..." oninput="filterAps()"></label>
+</div>
+<div id="ap-list" class="aplist"><div style="padding:18px;text-align:center;color:var(--mut);font-size:13px">اضغط تحديث لفحص الشبكات القريبة</div></div>
+<p class="hint" style="margin-top:10px"> اختر شبكة من الجدول ثم اختر نوع الهجوم. الـ RSSI الأقرب لـ 0 هو الأقوى.</p>
+</div>
+</div>
+
+<div class="card">
+<div class="card-h"><h2> الحالة</h2><span id="selInfo" class="pill">لم يتم الاختيار</span></div>
+<div class="card-b">
+<div class="kpi">
+<div class="k"><b id="k-ap">—</b><span>APs</span></div>
+<div class="k"><b id="k-sel">—</b><span>Selected</span></div>
+<div class="k"><b id="k-rssi">—</b><span>RSSI</span></div>
+</div>
+<div id="runningMini" class="hide" style="margin-top:14px">
+<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--mut)"><span>التقدم</span><span id="miniTime">0/0s</span></div>
+<div class="progress"><div id="miniBar" class="bar"></div></div>
+</div>
+</div>
+</div>
+</div>
+
+<div style="display:grid;gap:18px;align-content:start">
+<div class="card">
+<div class="card-h"><h2> إعداد الهجوم — قوة قصوى</h2><span class="pill" id="speedBadge" style="background:rgba(0,230,118,.15);border-color:rgba(0,230,118,.3)">TURBO READY</span></div>
+<div class="card-b">
+<form onsubmit="runAttack();return false">
+<div class="attack-types" id="attackTypes">
+<div class="at" data-v="1" onclick="pickType(1)"><b>HANDSHAKE</b><span>التقاط Handshake</span></div>
+<div class="at active" data-v="2" onclick="pickType(2)"><b>PMKID</b><span>سريع — 5 ثواني</span></div>
+<div class="at" data-v="3" onclick="pickType(3)"><b>DoS / Deauth</b><span>حرمان الخدمة</span></div>
+</div>
+<input type="hidden" id="attack_type" value="2">
+<div class="grid2">
+<div><label class="lab">طريقة الهجوم</label><select id="attack_method" class="sel"><option value="" disabled selected>تلقائي</option></select></div>
+<div><label class="lab">المهلة (ثانية)</label><input id="attack_timeout" class="inp" type="number" min="0" max="255" value="5" required></div>
+</div>
+<button class="btn btn-p" style="width:100%;margin-top:14px;padding:13px;font-size:14px"> بدء الهجوم — Attack</button>
+<p style="font-size:11px;color:var(--mut);text-align:center;margin-top:8px">سيتم قطع الاتصال مؤقتاً أثناء الهجوم — أعد الاتصال بـ ManagementAP</p>
+</form>
+</div>
+</div>
+<div class="card">
+<div class="card-h"><h2>ℹ نصائح السرعة</h2></div>
+<div class="card-b" style="font-size:12px;color:var(--mut);display:grid;gap:8px">
+<div> PMKID الأسرع — لا يحتاج عملاء متصلين</div>
+<div> HANDSHAKE يحتاج عميل متصل + Deauth</div>
+<div> DoS للاختبار فقط على شبكاتك</div>
+<div> استخدم Hashcat لفك PMKID / HCCAPX</div>
+</div>
+</div>
+</div>
+</main>
+
+<section id="running" class="wrap hide" style="grid-template-columns:1fr">
+<div class="card" style="text-align:center;padding:30px 20px">
+<h2 style="font-size:18px"> الهجوم قيد التنفيذ...</h2>
+<p style="color:var(--mut);font-size:13px;margin:6px 0 14px">لا تغلق الصفحة — قد تنقطع الشبكة مؤقتاً</p>
+<div style="font-size:42px;font-weight:900;letter-spacing:-1px"><span id="running-progress">0/0s</span></div>
+<div class="progress" style="max-width:520px;margin:16px auto"><div id="runBar" class="bar"></div></div>
+<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+<span class="pill" id="runType">PMKID</span><span class="pill" id="runTarget">—</span>
+</div>
+</div>
+</section>
+
+<section id="result" class="wrap hide" style="grid-template-columns:1fr">
+<div class="card">
+<div class="card-h"><h2> النتيجة — Result</h2><button class="btn btn-g" onclick="resetAttack()">↺ هجوم جديد</button></div>
+<div class="card-b">
+<div id="result-meta" style="font-weight:800;margin-bottom:10px"></div>
+<div id="result-content"></div>
+</div>
+</div>
+</section>
+
+<div id="errors" style="max-width:1100px;margin:0 auto;padding:0 20px;color:#FF6B6B;font-size:13px"></div>
+
+<script>
+var AttackStateEnum={READY:0,RUNNING:1,FINISHED:2,TIMEOUT:3};
+var AttackTypeEnum={ATTACK_TYPE_PASSIVE:0,ATTACK_TYPE_HANDSHAKE:1,ATTACK_TYPE_PMKID:2,ATTACK_TYPE_DOS:3};
+var selectedRow=null,selectedApIndex=-1,selectedRSSI=0,pollTO,runInt,attack_timeout=0,time_elapsed=0,apCache=[];
+var $=s=>document.getElementById(s);
+function toast(m,err){var e=$("toastMsg");e.textContent=m;e.style.display="block";e.style.borderColor=err?"rgba(255,59,48,.4)":"var(--br)";setTimeout(()=>e.style.display="none",2600)}
+function hideAll(){["loading","ready","running","result"].forEach(id=>$(id).classList.add("hide"))}
+function pickType(v){$("attack_type").value=v;document.querySelectorAll(".at").forEach(a=>a.classList.toggle("active",a.dataset.v==v));updateConfigurableFields({value:v})}
+function getStatus(){
+fetch("http://192.168.4.1/status",{cache:"no-store"}).then(r=>r.arrayBuffer()).then(buf=>{
+if(!buf||buf.byteLength<4) throw 0;
+var u8=new Uint8Array(buf),state=u8[0],type=u8[1],size=new Uint16Array(buf,2,1)[0],content=new Uint8Array(buf,4);
+hideAll();
+if(state===0){$("conn").textContent="متصل — Ready";$("loading").classList.add("hide");$("ready").classList.remove("hide");refreshAps()}
+else if(state===1){$("conn").textContent="قيد التشغيل — Running";$("running").classList.remove("hide");clearTimeout(pollTO);pollTO=setTimeout(getStatus,1000)}
+else if(state===2||state===3){showResult(state===2?"FINISHED":"TIMEOUT",type,size,content)}
+}).catch(()=>{hideAll();$("ready").classList.remove("hide");$("errors").textContent="تعذر الوصول — تأكد من اتصالك بـ ManagementAP";setTimeout(getStatus,1500)})
+}
+function refreshAps(){
+$("ap-list").innerHTML='<div style="padding:20px"><div class="skel" style="height:16px;margin-bottom:10px"></div><div class="skel" style="height:16px;margin-bottom:10px"></div><div class="skel" style="height:16px;width:70%"></div><div style="text-align:center;color:var(--mut);font-size:12px;margin-top:10px">جاري الفحص...</div></div>';
+fetch("http://192.168.4.1/ap-list",{cache:"no-store"}).then(r=>r.arrayBuffer()).then(buf=>{
+var a=new Uint8Array(buf),rows=[];for(let i=0;i<a.byteLength;i+=40){let ssid=new TextDecoder().decode(a.subarray(i,i+32)).replace(/\0.*$/,""),bssid=[...a.slice(i+33,i+39)].map(b=>("00"+b.toString(16)).slice(-2)).join(":"),rssi=a[i+39]-255;rows.push({ssid: ssid||"<hidden>",bssid,rssi,idx:i/40})}
+apCache=rows;$("k-ap").textContent=rows.length;renderAps(rows)
+}).catch(()=>{$("ap-list").innerHTML='<div style="padding:16px;color:#FF6B6B;text-align:center">فشل الفحص — حاول مرة أخرى</div>'})
+}
+function renderAps(rows){
+if(!rows.length){$("ap-list").innerHTML='<div style="padding:18px;text-align:center;color:var(--mut)">لا توجد شبكات</div>';return}
+$("ap-list").innerHTML=rows.map(r=>{
+let lvl=r.rssi>-60?4:r.rssi>-70?3:r.rssi>-80?2:1,cls=lvl>3?"ok":lvl>2?"mid":"low",h= [4,8,12,16];
+let bars='<span class="bars '+cls+'">'+[0,1,2,3].map(i=>`<i style="height:${h[i]}px;opacity:${i<lvl?1:.2}"></i>`).join("")+'</span>';
+return `<div class="row" data-idx="${r.idx}" data-rssi="${r.rssi}" data-ssid="${r.ssid.toLowerCase()}" data-bssid="${r.bssid}" onclick="selectAp(this)"><div><div class="ssid">${esc(r.ssid)}</div><div class="meta">${r.bssid} • ${r.rssi} dBm</div></div><div class="rssi">${bars}<span class="pill">${r.rssi} dBm</span></div></div>`
+}).join("")
+}
+function esc(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
+function filterAps(){let q=$("apSearch").value.toLowerCase().trim();if(!q) return renderAps(apCache);renderAps(apCache.filter(r=>r.ssid.toLowerCase().includes(q)||r.bssid.includes(q)))}
+function selectAp(el){
+if(selectedRow) selectedRow.classList.remove("sel");
+selectedRow=el;el.classList.add("sel");selectedApIndex=parseInt(el.dataset.idx);selectedRSSI=el.dataset.rssi;
+$("selInfo").textContent=el.querySelector(".ssid").textContent+" • "+el.dataset.bssid;
+$("k-sel").textContent=el.querySelector(".ssid").textContent.slice(0,10);$("k-rssi").textContent=selectedRSSI+" dBm";
+$("runTarget").textContent=el.querySelector(".ssid").textContent+" — "+el.dataset.bssid;
+}
+function runAttack(){
+if(selectedApIndex===-1){toast("اختر الشبكة أولاً",1);return}
+hideAll();$("running").classList.remove("hide");
+let buf=new ArrayBuffer(4),u=new Uint8Array(buf);u[0]=selectedApIndex;u[1]=parseInt($("attack_type").value);u[2]=parseInt($("attack_method").value||0);u[3]=parseInt($("attack_timeout").value||5);
+fetch("http://192.168.4.1/run-attack",{method:"POST",body:buf});
+attack_timeout=u[3];time_elapsed=0;countProgress();
+clearInterval(runInt);runInt=setInterval(countProgress,1000);
+$("runType").textContent=["PASSIVE","HANDSHAKE","PMKID","DoS"][u[1]]||"Attack";
+pollTO=setTimeout(getStatus,800);
+}
+function countProgress(){
+if(time_elapsed>=attack_timeout){clearInterval(runInt)}
+let p=Math.min(100,Math.round((time_elapsed/Math.max(1,attack_timeout))*100));
+$("running-progress").textContent=time_elapsed+"/"+attack_timeout+"s";
+$("miniTime").textContent=time_elapsed+"/"+attack_timeout+"s";
+$("runBar").style.width=p+"%";$("miniBar").style.width=p+"%";
+if(time_elapsed<attack_timeout) time_elapsed++
+}
+function resetAttack(){hideAll();$("ready").classList.remove("hide");clearInterval(runInt);fetch("http://192.168.4.1/reset",{method:"HEAD"});getStatus()}
+function showResult(status,type,size,content){
+hideAll();clearInterval(runInt);$("result").classList.remove("hide");
+let label=status==="FINISHED"?" مكتمل — FINISHED":" انتهت المهلة — TIMEOUT";
+let tname={1:"HANDSHAKE",2:"PMKID",3:"DoS",0:"PASSIVE"}[type]||"UNKNOWN";
+$("result-meta").innerHTML=`<span style="color:var(--ok)">${label}</span> <span class="pill">${tname}</span> <span class="pill">${size} bytes</span>`;
+let rc=$("result-content");rc.innerHTML="";
+if(type===2) resultPmkid(content,size,rc);
+else if(type===1) resultHandshake(content,size,rc);
+else rc.innerHTML='<div class="hint">لا توجد بيانات للعرض لهذا النوع.</div>';
+}
+function copyText(t){navigator.clipboard&&navigator.clipboard.writeText(t);toast("تم النسخ ")}
+function resultPmkid(c,size,rc){
+let i=0,mac_ap=[...c.slice(i,i+6)].map(b=>("00"+b.toString(16)).slice(-2)).join("");i+=6;
+let mac_sta=[...c.slice(i,i+6)].map(b=>("00"+b.toString(16)).slice(-2)).join("");i+=6;
+let ssidLen=c[i];i+=1;let ssidBytes=c.slice(i,i+ssidLen);let ssidHex=[...ssidBytes].map(b=>("00"+b.toString(16)).slice(-2)).join("");let ssidTxt=new TextDecoder().decode(ssidBytes);i+=ssidLen;
+let pmkids=[];for(let j=i;j<size;j+=16) pmkids.push([...c.slice(j,j+16)].map(b=>("00"+b.toString(16)).slice(-2)).join(""));
+let hashLines=pmkids.map(p=>`${p}*${mac_ap}*${mac_sta}*${ssidHex}`).join("\n");
+rc.innerHTML=`
+<div class="grid2">
+<div><label class="lab">MAC AP</label><div class="code" style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span>${mac_ap}</span><button class="btn btn-g" style="padding:6px 10px" onclick="copyText('${mac_ap}')">نسخ</button></div></div>
+<div><label class="lab">MAC STA</label><div class="code" style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span>${mac_sta}</span><button class="btn btn-g" style="padding:6px 10px" onclick="copyText('${mac_sta}')">نسخ</button></div></div>
+</div>
+<div style="margin-top:12px"><label class="lab">SSID</label><div class="code">${esc(ssidTxt)} <span style="color:var(--mut)">(${ssidHex})</span> <button class="btn btn-g" style="float:inline-end;padding:4px 8px" onclick="copyText('${ssidTxt}')">نسخ</button></div></div>
+<div style="margin-top:12px"><label class="lab">PMKID (${pmkids.length})</label>${pmkids.map((p,k)=>`<div class="code" style="margin-bottom:6px">#${k}: ${p} <button class="btn btn-g" style="float:inline-end;padding:2px 8px" onclick="copyText('${p}')">نسخ</button></div>`).join("")}</div>
+<div style="margin-top:12px"><label class="lab">Hashcat 22000 — جاهز للكسر</label><div class="code" style="position:relative">${hashLines}<button class="btn btn-p" style="position:absolute;inset-inline-end:8px;top:8px;padding:6px 10px" onclick="copyText(\`${hashLines}\`)">نسخ الكل</button></div></div>
+<p style="margin-top:10px;font-size:12px;color:var(--mut)">شغّل: <span class="code" style="display:inline;padding:4px 8px">hashcat -m 22000 hash.txt wordlist.txt</span></p>`;
+}
+function resultHandshake(c,size,rc){
+let hex=[...c].map(b=>("00"+b.toString(16)).slice(-2)).join("");let preview=hex.match(/.{1,64}/g)?.slice(0,12).join("\n")||hex.slice(0,500);
+rc.innerHTML=`
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+<a class="btn btn-p" href="capture.pcap" download> تحميل PCAP</a>
+<a class="btn btn-g" href="capture.hccapx" download> تحميل HCCAPX</a>
+<button class="btn btn-g" onclick="copyText('${hex.slice(0,200)}')">نسخ HEX</button>
+</div>
+<div class="code" style="max-height:260px;overflow:auto;white-space:pre-wrap">${preview}${hex.length>768?"\n...":""}</div>
+<p style="margin-top:8px;color:var(--mut);font-size:12px">${size} bytes • افتح الملف بـ Wireshark / Hashcat</p>`;
+}
+function updateConfigurableFields(el){
+let v=parseInt(el.value),sel=$("attack_method");sel.innerHTML="";sel.removeAttribute("disabled");
+if(v===1){$("attack_timeout").value=60;["DEAUTH_ROGUE_AP","DEAUTH_BROADCAST","CAPTURE_ONLY"].forEach((t,i)=>{let o=document.createElement("option");o.value=i;o.textContent=t;o.selected=i===0;sel.appendChild(o)})}
+else if(v===2){$("attack_timeout").value=5;sel.setAttribute("disabled","");let o=document.createElement("option");o.value=0;o.textContent="AUTO — تلقائي";o.selected=true;sel.appendChild(o)}
+else if(v===3){$("attack_timeout").value=120;["DEAUTH_ROGUE_AP","DEAUTH_BROADCAST","DEAUTH_COMBINE_ALL"].forEach((t,i)=>{let o=document.createElement("option");o.value=i;o.textContent=t;o.selected=i===0;sel.appendChild(o)})}
+}
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;$('installBtn').classList.remove('hide')});
+function doInstall(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{$('installBtn').classList.add('hide');deferredPrompt=null})}}
+if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{})}
+function toggleTurbo(){let on=$('turbo').checked;$('speedBadge').textContent=on?'TURBO ON ':'TURBO READY';$('speedBadge').style.background=on?'rgba(83,98,255,.2)':'rgba(0,230,118,.15)';if(on){$('attack_timeout').value=3;pickType(2)}toast(on?'تم تفعيل وضع القوة القصوى ':'تم إيقاف التيربو')}
+document.addEventListener("DOMContentLoaded",()=>{pickType(2);getStatus()});
+</script>
+</body>
+</html>
