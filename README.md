@@ -38,7 +38,7 @@ esp32-wifi-audit/
 │   ├── hccapx_serializer/     # hccapx capture format writer
 │   ├── pcap_serializer/       # pcap writer for Wireshark
 │   ├── webserver/             # HTTP server + HTML dashboard
-│   └── wsl_bypasser/          # WSL toolchain helper (by risinek)
+│   └── wsl_bypasser/          # WSL toolchain helper (by MR-Glint)
 └── doc/
     └── ATTACKS_THEORY.md      # Theory behind the implemented attacks
 ```
@@ -85,4 +85,4 @@ This firmware is intended for **research, education, and authorized penetration 
 
 ## License
 
-Distributed under the MIT License. See `LICENSE` for details. The `wsl_bypasser` component is an open-source component authored by risinek.
+Distributed under the MIT License. See `LICENSE` for details. The `wsl_bypasser` component is an open-source component authored by Mr.Glint
